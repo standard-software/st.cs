@@ -1,5 +1,6 @@
 ﻿/*----------------------------------------
 st_cs
+Standard Software Library C#
 ----------------------------------------
 ModuleName:     Core Module
 FileName:       st_cs.cs
@@ -809,11 +810,7 @@ namespace st_cs
                     MergeStatement("TESTTABLE02", "FIELD01='0123'", listFieldValueUpdadte, listFieldValueInsert));
                 
             }
-
-
-
         }
-
     }
 
     //----------------------------------------
