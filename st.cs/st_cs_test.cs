@@ -25,6 +25,9 @@ namespace st_cs
             st_cs_Core.test_LastStrFirstDelim();
             st_cs_Core.test_LastStrLastDelim();
 
+            st_cs_Core.Path.test_AppExePath();
+            st_cs_Core.Config.test_Config();
+
             st_cs_Core.SQL.test_InsertStatement();
             st_cs_Core.SQL.test_UpdateSentence();
             st_cs_Core.SQL.test_MergeStatement();

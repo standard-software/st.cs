@@ -10,7 +10,7 @@ All Right Reserved:
     Name:       Standard Software
     URL:        https://www.facebook.com/stndardsoftware/
 --------------------------------------
-Version:        2017/06/13
+Version:        2017/07/04
 //----------------------------------------*/
 using System;
 using System.Collections.Generic;
@@ -18,12 +18,17 @@ using System.Collections.Generic;
 using System.Diagnostics;       //Debug.Assert
 using System.Text;              //Encoding
 
-//using System.Windows.Forms;
-//MessageBox    WinForms
+using System.Configuration;     //Configuration
+//[プロジェクト][参照の追加]
+//[アセンブリ][フレームワーク]
+//[System.Configuration][OK]の操作が必要
+
+//WinFormの場合
+//using System.Windows.Forms;   //MessageBox
 //[参照の追加][アセンブリ][フレームワーク][System.Windows.Forms]を選択
 
-using System.Windows;
-//MessageBox    WinForms
+//WPFの場合
+using System.Windows;           //MessageBox
 //[参照の追加][アセンブリ][フレームワーク][PresentationFramework]を選択
 
 namespace st_cs
@@ -60,7 +65,7 @@ namespace st_cs
             return result;
         }
 
-        public static bool OrValue<T>(T value, params T[] compares) 
+        public static bool OrValue<T>(T value, params T[] compares)
         {
             foreach (var item in compares)
             {
@@ -299,7 +304,7 @@ namespace st_cs
         //----------------------------------------
         public static string IncludeStartEnd(string str, string subStr)
         {
-            if (string.IsNullOrEmpty(str)) return subStr + subStr; 
+            if (string.IsNullOrEmpty(str)) return subStr + subStr;
             return IncludeStart(IncludeEnd(str, subStr), subStr);
         }
 
@@ -362,13 +367,13 @@ namespace st_cs
 
         public static void test_FirstStrLastDelim()
         {
-             Debug.Assert("123" == FirstStrLastDelim("123,456", ","));
-             Debug.Assert("123,456" == FirstStrLastDelim("123,456,789", ","));
-             Debug.Assert("123" == FirstStrLastDelim("123ttt456", "ttt"));
-             Debug.Assert("123t" == FirstStrLastDelim("123ttt456", "tt"));
-             Debug.Assert("123tt" == FirstStrLastDelim("123ttt456", "t"));
-             Debug.Assert("123ttt456" == FirstStrLastDelim("123ttt456", ","));
-             Debug.Assert(",123" == FirstStrLastDelim(",123,", ","));
+            Debug.Assert("123" == FirstStrLastDelim("123,456", ","));
+            Debug.Assert("123,456" == FirstStrLastDelim("123,456,789", ","));
+            Debug.Assert("123" == FirstStrLastDelim("123ttt456", "ttt"));
+            Debug.Assert("123t" == FirstStrLastDelim("123ttt456", "tt"));
+            Debug.Assert("123tt" == FirstStrLastDelim("123ttt456", "t"));
+            Debug.Assert("123ttt456" == FirstStrLastDelim("123ttt456", ","));
+            Debug.Assert(",123" == FirstStrLastDelim(",123,", ","));
         }
 
 
@@ -386,7 +391,7 @@ namespace st_cs
             {
                 return str;
             }
-        }        
+        }
 
         public static void test_LastStrFirstDelim()
         {
@@ -414,7 +419,7 @@ namespace st_cs
                 return str;
             }
         }
-        
+
         public static void test_LastStrLastDelim()
         {
             Debug.Assert("456" == LastStrLastDelim("123,456", ","));
@@ -603,6 +608,102 @@ namespace st_cs
         }
 
         //----------------------------------------
+        //◆特殊フォルダパス
+        //----------------------------------------
+        //  ・  WindowsDesktop限定になると思う
+        //----------------------------------------
+        public static class Path
+        {
+            public static string AppExePath()
+            {
+                return System.Reflection.Assembly.GetEntryAssembly().Location;
+            }
+
+            public static string AppFolderPath()
+            {
+                return System.IO.Path.GetDirectoryName(AppExePath());
+            }
+
+            //----------------------------------------
+            //・実行ファイルのパス
+            //----------------------------------------
+            //  ・  Exeの場合はExeのパス
+            //      DLLの場合はDLLのパス
+            //----------------------------------------
+            public static string AssemblyPath()
+            {
+                return System.Reflection.Assembly.GetExecutingAssembly().Location;
+            }
+
+            //----------------------------------------
+            //・実行ファイルのフォルダパス
+            //----------------------------------------
+            public static string AssemblyFolderPath()
+            {
+                return System.IO.Path.GetDirectoryName(AssemblyPath());
+            }
+
+            public static void test_AppExePath()
+            {
+                MessageBox.Show(AppExePath());
+                MessageBox.Show(AssemblyPath());
+            }
+
+        }
+
+
+        //----------------------------------------
+        //◆.configファイルアクセス
+        //----------------------------------------
+        public static class Config
+        {
+            //----------------------------------------
+            //・Configurationクラスのインスタンスの取得
+            //----------------------------------------
+            //  ・  ConfigurationManagerは、オプションがわけわからなさすぎて
+            //      使いにくい(馬鹿な)設計なので、ラッピングしてシンプルにする
+            //----------------------------------------
+            public static Configuration getConfiguraton(string configFilePath)
+            {
+                return ConfigurationManager.OpenMappedExeConfiguration(
+                    new ExeConfigurationFileMap { ExeConfigFilename = configFilePath },
+                    ConfigurationUserLevel.None);
+            }
+
+            //configの取得を行う
+            public static string getConfigAppSettingDefault(Configuration config,
+                string key, string defaultValue = "")
+            {
+                if (config.AppSettings.Settings[key] == null)
+                {
+                    return defaultValue;
+                }
+                else
+                {
+                    return config.AppSettings.Settings[key].Value;
+                }
+            }
+
+            //configの設定を行う
+            public static void setConfigAppSetting(Configuration config, string key, string value)
+            {
+                if (config.AppSettings.Settings[key] == null)
+                {
+                    config.AppSettings.Settings.Add(key, "");
+                }
+                config.AppSettings.Settings[key].Value = value;
+            }
+
+            public static void test_Config()
+            {
+                var config = getConfiguraton(Path.AppFolderPath() + @"\TestConfig.confg");
+                setConfigAppSetting(config, "TestKey01", "TestValue01");
+                Check("TestValue01", getConfigAppSettingDefault(config, "TestKey01", ""));
+            }
+
+        }
+
+        //----------------------------------------
         //◆SQL
         //----------------------------------------
         public static class SQL
@@ -627,17 +728,17 @@ namespace st_cs
                 }
 
                 return
-                    "INSERT INTO " + tableName +" ( " +
+                    "INSERT INTO " + tableName + " ( " +
                     String.Join(", ", fields.ToArray()) +
-                    " ) VALUES ( " + 
-                     String.Join(", ", values.ToArray()) + 
+                    " ) VALUES ( " +
+                     String.Join(", ", values.ToArray()) +
                     " )";
             }
 
             public static void test_InsertStatement()
             {
                 var listFieldValue = new List<FieldValueItem>();
-                listFieldValue.Add(new FieldValueItem() { Field = "FIELD01", Value = IncludeStartEnd("0123", "'") , });
+                listFieldValue.Add(new FieldValueItem() { Field = "FIELD01", Value = IncludeStartEnd("0123", "'"), });
                 Check("INSERT INTO TESTTABLE01 ( FIELD01 ) VALUES ( '0123' )",
                     InsertStatement("TESTTABLE01", listFieldValue));
 
@@ -684,10 +785,10 @@ namespace st_cs
             //  ・   論理条件節は英語でLogicalConditionClause
             //  ・   WHERE句は英語でWHERE Clause
             //----------------------------------------
-            public static string ConditionClause(List<FieldValueItem> list, 
+            public static string ConditionClause(List<FieldValueItem> list,
                 string conditionAndOr,
                 string startBracket = "(", string endBracket = ")",
-                string startInsideBracket = "(", string endInsideBracket = ")", 
+                string startInsideBracket = "(", string endInsideBracket = ")",
                 string equalOperator = "=")
             {
                 Debug.Assert(0 <= list.Count);
@@ -700,7 +801,7 @@ namespace st_cs
 
                 if (2 <= list.Count)
                 {
-                    return 
+                    return
                         startBracket + startInsideBracket +
                         String.Join(endInsideBracket + conditionAndOr + startInsideBracket, fieldEqualValue.ToArray()) +
                         endInsideBracket + endBracket;
@@ -715,16 +816,25 @@ namespace st_cs
             public static void test_ConditionClause()
             {
                 var listFieldValue = new List<FieldValueItem>();
-                listFieldValue.Add(new FieldValueItem() {
-                    Field = "FIELD01", Value = IncludeStartEnd("0123", "'"), });
+                listFieldValue.Add(new FieldValueItem()
+                {
+                    Field = "FIELD01",
+                    Value = IncludeStartEnd("0123", "'"),
+                });
                 Check("(FIELD01='0123')",
                     ConditionClause(listFieldValue, "AND"));
                 //条件が一つのときは括弧が一重、ANDかORは無視される
 
-                listFieldValue.Add(new FieldValueItem() {
-                    Field = "FIELD02", Value = IncludeStartEnd("0456", "'"), });
-                listFieldValue.Add(new FieldValueItem() {
-                    Field = "FIELD03", Value = "sysdate", });
+                listFieldValue.Add(new FieldValueItem()
+                {
+                    Field = "FIELD02",
+                    Value = IncludeStartEnd("0456", "'"),
+                });
+                listFieldValue.Add(new FieldValueItem()
+                {
+                    Field = "FIELD03",
+                    Value = "sysdate",
+                });
 
                 Check("((FIELD01='0123') AND (FIELD02='0456') AND (FIELD03=sysdate))",
                     ConditionClause(listFieldValue, " AND "));
@@ -749,7 +859,7 @@ namespace st_cs
             //----------------------------------------
             //  ・   MERGE文はOracleDBのみの機能だと思う
             //----------------------------------------
-            public static string MergeStatement(string tableName, string usingDualOn, 
+            public static string MergeStatement(string tableName, string usingDualOn,
                 List<FieldValueItem> listUpdate, List<FieldValueItem> listInsert)
             {
                 var fieldEqualValue = new List<string>();
@@ -759,7 +869,7 @@ namespace st_cs
                 }
 
                 //Update句
-                var updateClauses = 
+                var updateClauses =
                     "UPDATE SET " +
                     String.Join(", ", fieldEqualValue.ToArray());
 
@@ -780,7 +890,7 @@ namespace st_cs
                     " )";
 
                 return
-                    "MERGE INTO " + tableName + 
+                    "MERGE INTO " + tableName +
                     " USING DUAL ON ( " + usingDualOn + " )" +
                     " WHEN MATCHED THEN " + updateClauses +
                     " WHEN NOT MATCHED THEN " + insertClauses;
@@ -793,8 +903,8 @@ namespace st_cs
                 var listFieldValueInsert = new List<FieldValueItem>();
                 listFieldValueInsert.Add(new FieldValueItem() { Field = "FIELD01", Value = IncludeStartEnd("0123", "'"), });
 
-                Check("MERGE INTO TESTTABLE01 USING DUAL ON ( FIELD01='0123' ) " + 
-                    "WHEN MATCHED THEN UPDATE SET FIELD01='0456' " + 
+                Check("MERGE INTO TESTTABLE01 USING DUAL ON ( FIELD01='0123' ) " +
+                    "WHEN MATCHED THEN UPDATE SET FIELD01='0456' " +
                     "WHEN NOT MATCHED THEN INSERT ( FIELD01 ) VALUES ( '0123' )",
                     MergeStatement("TESTTABLE01", "FIELD01='0123'", listFieldValueUpdadte, listFieldValueInsert));
 
@@ -808,7 +918,7 @@ namespace st_cs
                     "WHEN MATCHED THEN UPDATE SET FIELD01='0456', FIELD02='0456', FIELD03=sysdate " +
                     "WHEN NOT MATCHED THEN INSERT ( FIELD01, FIELD02, FIELD03 ) VALUES ( '0123', '0456', sysdate )",
                     MergeStatement("TESTTABLE02", "FIELD01='0123'", listFieldValueUpdadte, listFieldValueInsert));
-                
+
             }
         }
     }
@@ -870,5 +980,10 @@ namespace st_cs
 ◇  ver 2017/06/13
 ・  GitHubに登録のために調整
     WPFとWinFormsへの参照設定記載
+◇  ver 2017/07/05
+・  Path Class 作成
+    アプリケーションフォルダなど取得
+・  Config Class 作成
+    ConfigurationManager の機能を隠蔽して使いやすくした
 //----------------------------------------*/
 
