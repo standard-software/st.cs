@@ -6,6 +6,14 @@ using System.Threading.Tasks;
 
 using System.Diagnostics;   //Debug.Assert
 
+//WinFormの場合
+//using System.Windows.Forms;   //MessageBox
+//[参照の追加][アセンブリ][フレームワーク][System.Windows.Forms]を選択
+
+//WPFの場合
+using System.Windows;           //MessageBox
+//[参照の追加][アセンブリ][フレームワーク][PresentationFramework]を選択
+
 namespace st_cs
 {
     public static class st_cs_test
@@ -25,6 +33,7 @@ namespace st_cs
             st_cs_Core.test_LastStrFirstDelim();
             st_cs_Core.test_LastStrLastDelim();
 
+            st_cs_Core.Path.test_IsRelativePath();
             st_cs_Core.Path.test_AppExePath();
             st_cs_Core.Config.test_Config();
 
@@ -38,6 +47,8 @@ namespace st_cs
 
             st_cs_Core.test_ParseDefault();
             st_cs_Core.test_TryParse();
+
+            MessageBox.Show("test Finish.");
         }
     }
 }
